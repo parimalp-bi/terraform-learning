@@ -12,9 +12,9 @@ variable "location" {
 variable "public_ip_name" {
   description = "public ip name"
   type        = string
-  }
+}
 
 variable "public_ip_allocation_method" {
   description = "public_ip_allocation_method"
   type        = string
-  }
+}
