@@ -1,4 +1,4 @@
 output "nic_id" {
-  description = "ID of the created nic "
-  value       = azurerm_network_interface.vm_nic.id
+  description = "The ID of the created Network Interface"
+  value       = azurerm_network_interface.nic.id
 }
