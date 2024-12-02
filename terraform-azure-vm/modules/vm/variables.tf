@@ -1,15 +1,20 @@
 variable "vm_name" {
-  description = "Name of the Virtual Machine"
+  description = "The name of the virtual machine"
   type        = string
 }
 
 variable "location" {
-  description = "Azure location where resources will be created"
+  description = "The Azure location for resources"
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "Name of the resource group"
+  description = "The name of the resource group"
+  type        = string
+}
+
+variable "nic_id" {
+  description = "The ID of the Network Interface"
   type        = string
 }
 
@@ -18,74 +23,37 @@ variable "vm_size" {
   type        = string
 }
 
-variable "subnet_id" {
-  description = "ID of the subnet to which the VM will be connected"
-  type        = string
-}
-
 variable "admin_username" {
-  description = "Admin username for the VM"
+  description = "The admin username for the virtual machine"
   type        = string
 }
 
 variable "admin_password" {
-  description = "Admin password for the VM"
+  description = "The admin password for the virtual machine"
   type        = string
 }
 
 variable "image_publisher" {
-  description = "Image publisher"
+  description = "The publisher of the VM image"
   type        = string
 }
 
 variable "image_offer" {
-  description = "Image offer"
+  description = "The offer of the VM image"
   type        = string
 }
 
 variable "image_sku" {
-  description = "Image SKU"
+  description = "The SKU of the VM image"
   type        = string
 }
 
 variable "image_version" {
-  description = "Image version"
+  description = "The version of the VM image"
   type        = string
 }
 
 variable "tags" {
-  description = "Tags to apply to resources"
+  description = "A map of tags to assign to the VM"
   type        = map(string)
 }
-
-# Network-related variables
-variable "vnet_name" {
-  description = "Name of the Virtual Network"
-  type        = string
-}
-
-variable "subnet_name" {
-  description = "Name of the Subnet"
-  type        = string
-}
-
-variable "address_space" {
-  description = "Address space for the virtual network"
-  type        = list(string)
-}
-
-variable "address_prefix" {
-  description = "Address prefix for the subnet"
-  type        = list(string)
-}
-
-
-variable "public_ip_name" {
-  description = "public ip name"
-  type        = string
-  }
-
-variable "public_ip_allocation_method" {
-  description = "public_ip_allocation_method"
-  type        = string
-  }

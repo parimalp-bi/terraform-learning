@@ -1,81 +1,20 @@
-variable "vm_name" {
-  description = "Name of the Virtual Machine"
-  type        = string
-}
-
 variable "location" {
-  description = "Azure location"
+  description = "The Azure location for resources"
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "Name of the resource group"
+  description = "The resource group name"
   type        = string
 }
 
-variable "vm_size" {
-  description = "The size of the virtual machine"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "ID of the subnet"
-  type        = string
-}
-
-# NIC module variables
-variable "nic_name" {
-  description = "Name of the Network Interface"
-  type        = string
-  default     = ""
-}
-
-# OS Profile variables
-variable "admin_username" {
-  description = "Admin username for the VM"
-  type        = string
-}
-
-variable "admin_password" {
-  description = "Admin password for the VM"
-  type        = string
-}
-
-# Image reference variables
-variable "image_publisher" {
-  description = "Image publisher"
-  type        = string
-}
-
-variable "image_offer" {
-  description = "Image offer"
-  type        = string
-}
-
-variable "image_sku" {
-  description = "Image SKU"
-  type        = string
-}
-
-variable "image_version" {
-  description = "Image version"
-  type        = string
-}
-
-# Tags
-variable "tags" {
-  description = "Tags to apply to resources"
-  type        = map(string)
-}
-
-# Network-related variables
 variable "vnet_name" {
-  description = "Name of the Virtual Network"
+  description = "The name of the virtual network"
   type        = string
 }
 
 variable "subnet_name" {
-  description = "Name of the Subnet"
+  description = "The name of the subnet"
   type        = string
 }
 
@@ -89,15 +28,57 @@ variable "address_prefix" {
   type        = list(string)
 }
 
-
-
-variable "public_ip_allocation_method" {
-  description = "public_ip_allocation_method"
+variable "public_ip_name" {
+  description = "The name of the public IP"
   type        = string
 }
 
-
-variable "public_ip_name" {
-  description = "Name of the public_ip_name"
+variable "public_ip_allocation_method" {
+  description = "The allocation method for the Public IP (Static or Dynamic)"
   type        = string
+}
+
+variable "vm_name" {
+  description = "The name of the virtual machine"
+  type        = string
+}
+
+variable "vm_size" {
+  description = "The size of the virtual machine"
+  type        = string
+}
+
+variable "admin_username" {
+  description = "The admin username for the virtual machine"
+  type        = string
+}
+
+variable "admin_password" {
+  description = "The admin password for the virtual machine"
+  type        = string
+}
+
+variable "image_publisher" {
+  description = "The publisher of the VM image"
+  type        = string
+}
+
+variable "image_offer" {
+  description = "The offer of the VM image"
+  type        = string
+}
+
+variable "image_sku" {
+  description = "The SKU of the VM image"
+  type        = string
+}
+
+variable "image_version" {
+  description = "The version of the VM image"
+  type        = string
+}
+
+variable "tags" {
+  description = "A map of tags to assign to the resources"
+  type        = map(string)
 }
