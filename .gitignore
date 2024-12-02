@@ -6,7 +6,7 @@
 crash.log
 
 # Ignore variable override files (sensitive or environment-specific)
-*.tfvars
+# *.tfvars
 *.tfvars.json
 
 # Ignore Terraform plan output files
