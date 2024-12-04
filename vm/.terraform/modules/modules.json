@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"network","Source":"../modules/network","Dir":"../modules/network"},{"Key":"nic","Source":"../modules/nic","Dir":"../modules/nic"},{"Key":"public_ip","Source":"../modules/public_ip","Dir":"../modules/public_ip"},{"Key":"vm","Source":"../modules/vm","Dir":"../modules/vm"}]}

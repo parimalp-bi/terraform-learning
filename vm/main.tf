@@ -1,5 +1,5 @@
 module "network" {
-  source              = "./modules/network"
+  source              = "../modules/network"
   vnet_name           = var.vnet_name
   subnet_name         = var.subnet_name
   location            = var.location
@@ -13,7 +13,7 @@ output "subnet_id" {
 }
 
 module "nic" {
-  source              = "./modules/nic"
+  source              = "../modules/nic"
   vm_name             = var.vm_name
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -26,7 +26,7 @@ output "nic_id" {
 }
 
 module "public_ip" {
-  source                      = "./modules/public_ip"
+  source                      = "../modules/public_ip"
   public_ip_name              = var.public_ip_name
   location                    = var.location
   resource_group_name         = var.resource_group_name
@@ -39,7 +39,7 @@ output "public_ip_id" {
 }
 
 module "vm" {
-  source              = "./modules/vm"
+  source              = "../modules/vm"
   vm_name             = var.vm_name
   location            = var.location
   resource_group_name = var.resource_group_name
