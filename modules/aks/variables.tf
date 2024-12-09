@@ -60,7 +60,7 @@ variable "node_resource_group_name" {
 
 variable "location" {
   type        = string
-  description = "The azure datacenter to deploy the resources to. (e.g: eastus2). This will be automatically determined from the Azure Subscription name if the Nuance Subscription naming convention is followed."
+  description = "The azure datacenter to deploy the resources to. (e.g: eastus2)."
 }
 
 variable "local_account_disabled" {
@@ -143,7 +143,7 @@ variable "agent_pool_default_fips_enabled" {
 variable "agent_pool_default_vm_size" {
   type        = string
   description = "The size of each VM in the Agent Pool (e.g. Standard_F1). Kubernetes Linux nodes VM type"
-  default     = "Standard_D16pds_v5"
+  default     = "Standard_D4s_v3"
 }
 
 variable "agent_pool_default_max_pods_count" {
@@ -278,6 +278,7 @@ variable "outbound_type" {
   description = "The outbound (egress) routing method which should be used for this Kubernetes Cluster. Possible values are loadBalancer, userDefinedRouting, managedNATGateway and userAssignedNATGateway. Defaults to loadBalancer"
   default     = "loadBalancer"
 }
+
 variable "outbound_ports_allocated" {
   type        = number
   description = "Number of desired SNAT(Source Network Address Translation)port for each VM in the clusters load balancer. Must be between 0 and 64000 inclusive. Ensures sufficient outbound connectivity for applications. # MUST BE a multiple of 8  "
@@ -317,6 +318,13 @@ variable "managed_aad_azure_rbac_enabled" {
   EOS
   default     = true
 }
+
+variable "workload_identity_enabled" {
+  type        = bool
+  default     = true
+  description = "Whether to enable Workload Identity."
+}
+
 
 variable "maintenance_window" {
   type = object({
@@ -425,6 +433,257 @@ EOT
 #  ]
 #}
 
+variable "attached_container_registry_ids" {
+  type        = list(string)
+  description = <<EOS
+  Resource IDs of attached ACRs. This grants AKS workloads permission to access container images stored in these registries directly through the kubelet identity principalm
+  Effectively does the same thing as 'attach-acr' flag under https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-update-optional-parameters for more information
+  EOS
+  default     = []
+}
+
+
+variable "workload_runtime" {
+  type        = string
+  description = <<EOS
+    (Optional) Used to specify the workload runtime. Allowed values are OCIContainer and WasmWasi.
+    WebAssembly System Interface node pools are in Public Preview - more information and details on
+    how to opt into the preview can be found in https://docs.microsoft.com/azure/aks/use-wasi-node-pools
+    OCIContainer-Represents the standard Open Container Initiative (OCI) runtime for running regular containerized workloads.
+    This is the default runtime and includes support for Linux and Windows containers using runtimes like ContainerD or Docker
+
+EOS
+  default     = "OCIContainer"
+  validation {
+    condition     = contains(["OCIContainer", "WasmWasi"], var.workload_runtime)
+    error_message = "Var.workload_runtime only allows \"OCIContainer\" and \"WasmWasi\"."
+  }
+}
+
+variable "agent_pools" {
+  description = <<EOS
+    Agent pool map. The map key.name is used as the name attribute for the node pool.
+
+    See https://www.terraform.io/docs/providers/azurerm/r/kubernetes_cluster_node_pool.html
+    for the semantics of each property.
+
+    WARNING: linux_os_config requires Preview feature Microsoft.ContainerService/CustomNodeConfigPreview to be enabled!
+    For os_sku: If not specified, the default is Ubuntu if OSType=Linux or Windows2019 if OSType=Windows. And the
+    default Windows OSSKU will be changed to Windows2022 after Windows2019 is deprecated.
+
+    WARNING: Updating availability_zones forces a replacement of the nodepool (destroy and recreate)
+             See https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool#zones
+  EOS
+
+  default = {}
+  type = map(object({
+    os_type                = string
+    os_sku                 = optional(string)
+    node_count             = number
+    vm_size                = string
+    mode                   = string
+    autoscale              = bool
+    max_node_count         = number
+    min_node_count         = number
+    os_disk_size_gb        = string
+    os_disk_type           = string
+    max_pods_count         = string
+    node_public_ip_enabled = bool
+    fips_enabled           = optional(bool)
+    node_labels            = map(string)
+    node_taints            = list(string)
+    subnet_id              = string
+    max_surge              = optional(number)
+    availability_zones     = optional(list(string)) # update this force a replacement https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool#zones
+    tags                   = optional(map(string))
+    kubelet_config = optional(object({
+      allowed_unsafe_sysctls    = optional(set(string))
+      container_log_max_line    = optional(number)
+      container_log_max_size_mb = optional(number)
+      cpu_cfs_quota_enabled     = optional(bool)
+      cpu_cfs_quota_period      = optional(string)
+      cpu_manager_policy        = optional(string)
+      image_gc_high_threshold   = optional(number)
+      image_gc_low_threshold    = optional(number)
+      pod_max_pid               = optional(number)
+      topology_manager_policy   = optional(string)
+    }))
+    linux_os_config = optional(object({
+      swap_file_size_mb             = optional(number)
+      transparent_huge_page_enabled = optional(string)
+      transparent_huge_page_defrag  = optional(string)
+      sysctl_config = optional(object({
+        fs_aio_max_nr                      = optional(number)
+        fs_file_max                        = optional(number)
+        fs_inotify_max_user_watches        = optional(number)
+        fs_nr_open                         = optional(number)
+        kernel_threads_max                 = optional(number)
+        net_core_netdev_max_backlog        = optional(number)
+        net_core_optmem_max                = optional(number)
+        net_core_rmem_default              = optional(number)
+        net_core_rmem_max                  = optional(number)
+        net_core_somaxconn                 = optional(number)
+        net_core_wmem_default              = optional(number)
+        net_core_wmem_max                  = optional(number)
+        net_ipv4_ip_local_port_range_max   = optional(number)
+        net_ipv4_ip_local_port_range_min   = optional(number)
+        net_ipv4_neigh_default_gc_thresh1  = optional(number)
+        net_ipv4_neigh_default_gc_thresh2  = optional(number)
+        net_ipv4_neigh_default_gc_thresh3  = optional(number)
+        net_ipv4_tcp_fin_timeout           = optional(number)
+        net_ipv4_tcp_keepalive_intvl       = optional(number)
+        net_ipv4_tcp_keepalive_probes      = optional(number)
+        net_ipv4_tcp_keepalive_time        = optional(number)
+        net_ipv4_tcp_max_syn_backlog       = optional(number)
+        net_ipv4_tcp_max_tw_buckets        = optional(number)
+        net_ipv4_tcp_tw_reuse              = optional(bool)
+        net_netfilter_nf_conntrack_buckets = optional(number)
+        net_netfilter_nf_conntrack_max     = optional(number)
+        vm_max_map_count                   = optional(number)
+        vm_swappiness                      = optional(number)
+        vm_vfs_cache_pressure              = optional(number)
+      }))
+    }))
+  }))
+}
+
+/* agent_pools = {
+  pool1 = {
+    os_type               = "Linux"
+    os_sku                = "Ubuntu"
+    node_count            = 3
+    vm_size               = "Standard_DS2_v2"
+    mode                  = "System"
+    autoscale             = true
+    max_node_count        = 5
+    min_node_count        = 2
+    os_disk_size_gb       = "128"
+    os_disk_type          = "Ephemeral"
+    max_pods_count        = "110"
+    aks_version           = "1.28.0"
+    enable_node_public_ip = false
+    fips_enabled          = false
+    node_labels           = { "env" = "prod", "team" = "devops" }
+    node_taints           = ["key1=value1:NoSchedule"]
+    subnet_id             = "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet>/subnets/<subnet>"
+    max_surge             = 1
+    availability_zones    = ["1", "2"]
+    tags                  = { "project" = "AKS", "owner" = "team1" }
+
+    kubelet_config = {
+      allowed_unsafe_sysctls    = ["net.ipv4.tcp_syncookies"]
+      container_log_max_line    = 1000
+      container_log_max_size_mb = 50
+      cpu_cfs_quota_enabled     = true
+      cpu_manager_policy        = "static"
+      image_gc_high_threshold   = 85
+      image_gc_low_threshold    = 70
+      pod_max_pid               = 100
+      topology_manager_policy   = "restricted"
+    }
+
+    linux_os_config = {
+      swap_file_size_mb             = 2048
+      transparent_huge_page_enabled = "madvise"
+      transparent_huge_page_defrag  = "always"
+      sysctl_config = {
+        fs_file_max            = 2097152
+        net_core_somaxconn     = 1024
+        vm_swappiness          = 10
+        net_ipv4_tcp_keepalive_time = 600
+      }
+    }
+  }
+} */
+
+
+variable "law_sku" {
+  type        = string
+  default     = "PerGB2018"
+  description = <<EOS
+  -------------------------------------
+  (Optional)
+  You can override the SKU if needed. The Free SKU is N/A anymore, use "law_daily_quota_gb".
+  See https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace#sku
+  Default ""
+  -------------------------------------
+EOS
+  validation {
+    condition     = contains(["PerNode", "Premium", "Standard", "Standalone", "Unlimited", "CapacityReservation", "PerGB2018", ""], var.law_sku)
+    error_message = "Var.law_sku only allows https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace#sku and not 'Free' any more."
+  }
+}
+
+
+variable "law_daily_quota_gb" {
+  type        = number
+  default     = null
+  description = <<EOS
+  -------------------------------------
+  (Optional)
+  The workspace daily quota for ingestion in GB. Defaults to -1 (unlimited) if omitted.
+  You can use this feature to reduce cost, especially for testing environments (the Free SKU is N/A anymore).
+  Default ""
+  -------------------------------------
+EOS
+}
+
+variable "law_internet_ingestion_enabled" {
+  type        = bool
+  default     = true
+  description = <<EOS
+  -------------------------------------
+  (Optional)
+  Allow logs to be ingestion from the internet e.g external oms clents from an external k8s cluster.
+  Default true
+  -------------------------------------
+EOS
+}
+
+variable "law_internet_query_enabled" {
+  type        = bool
+  default     = true
+  description = <<EOS
+  -------------------------------------
+  (Optional)
+  Allow internet to query workspace.
+  Default true
+  -------------------------------------
+EOS
+}
+
+variable "law_capacity_reservation" {
+  type    = number
+  default = null
+  validation {
+    condition     = (var.law_capacity_reservation == null || can(regex("^$|^[1-5]00$|^[1-2]000$|^5000$", var.law_capacity_reservation)))
+    error_message = "The law_capacity_reservation must be between 100 and 500 in 100 increments or 1000, 2000, 5000."
+  }
+  description = <<EOS
+  -------------------------------------
+  (Optional)
+  Reserved capacity, see https://azure.microsoft.com/en-gb/pricing/details/monitor/
+  default null
+  -------------------------------------
+EOS
+}
+
+variable "law_retention_in_days" {
+  type    = number
+  default = 30
+  validation {
+    condition     = can(regex("^([1-6][0-9][0-9]|7[0-2][0-9]|730|[3-9][0-9])$", var.law_retention_in_days))
+    error_message = "The law_retention must be between 30 and 730."
+  }
+  description = <<EOS
+  -------------------------------------
+  (Optional)
+  Retention period of the Log Analytics Workspace in days. Between 30 and 730
+  Default 60
+  -------------------------------------
+EOS
+}
+
 
 variable "resource_group_tags" {
   type        = map(string)
@@ -441,5 +700,11 @@ variable "tags" {
 variable "agent_pool_default_tags" {
   type        = map(string)
   description = "(Optional) Map of tags for the default node pool"
+  default     = {}
+}
+
+variable "law_tags" {
+  type        = map(string)
+  description = "(Optional) Map of tags for the law tags"
   default     = {}
 }
