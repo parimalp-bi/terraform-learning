@@ -1,25 +1,7 @@
-# Ignore Terraform state files
-*.tfstate
-*.tfstate.*
-
-# Ignore crash logs
-crash.log
-
-# Ignore variable override files (sensitive or environment-specific)
-# *.tfvars
-*.tfvars.json
-
-# Ignore Terraform plan output files
-*.tfplan
-
-# Ignore Terraform lock file (used by the backend for state locking)
-.terraform.lock.hcl
-
-# Ignore .terraform directory
+.vscode/
 .terraform/
-
-# Ignore any generated logs
-*.log
-
-# Ignore specific config files (add any other environment-specific configs here)
-config.yaml
+.terraform.lock.hcl
+.local
+# Provisinor/vm/*.local
+Provisinor/*/*.local
+provider_override.tf

@@ -1,8 +1,3 @@
-variable "vm_name" {
-  description = "The name of the virtual machine"
-  type        = string
-}
-
 variable "location" {
   description = "The Azure location for resources"
   type        = string
@@ -18,19 +13,18 @@ variable "vnet_name" {
   type        = string
 }
 
-variable "subnet_name" {
-  description = "The name of the subnet"
-  type        = string
-}
 
 variable "address_space" {
   description = "Address space for the virtual network"
   type        = list(string)
 }
 
-variable "address_prefix" {
-  description = "Address prefix for the subnet"
-  type        = list(string)
+variable "subnets" {
+  description = "A list of subnet configurations"
+  type = list(object({
+    name           = string
+    address_prefix = list(string)
+  }))
 }
 
 variable "public_ip_name" {
@@ -48,11 +42,6 @@ variable "vm_name" {
   type        = string
 }
 
-
-variable "nic_id" {
-  description = "The ID of the Network Interface"
-  type        = string
-}
 
 variable "vm_size" {
   description = "The size of the virtual machine"
@@ -92,4 +81,9 @@ variable "image_version" {
 variable "tags" {
   description = "A map of tags to assign to the VM"
   type        = map(string)
+}
+
+variable "subnet_key" {
+  description = "Key of the subnet to attach the NIC"
+  type        = string
 }
