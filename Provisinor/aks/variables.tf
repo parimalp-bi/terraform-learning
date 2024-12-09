@@ -8,8 +8,16 @@ variable "vnet_name" {
   type        = string
 }
 
-variable "subnet_name" {
-  description = "The name of the subnet"
+variable "subnets" {
+  description = "A list of subnet configurations"
+  type = list(object({
+    name           = string
+    address_prefix = list(string)
+  }))
+}
+
+variable "subnet_key" {
+  description = "Key of the subnet to attach the NIC"
   type        = string
 }
 
@@ -18,10 +26,7 @@ variable "address_space" {
   type        = list(string)
 }
 
-variable "address_prefix" {
-  description = "Address prefix for the subnet"
-  type        = list(string)
-}
+
 
 variable "prefix" {
   type        = string
@@ -34,6 +39,11 @@ variable "resource_group_name" {
   default     = null
 }
 
+variable "vnet_resource_group_name" {
+  type        = string
+  description = "(Optional) define a custom resource group name"
+  default     = "parimalaks-aks-vnet-rg"
+}
 variable "node_resource_group_name" {
   type        = string
   description = "(Optional) define a custom resource group name for the actual VMs and other managed AKS resources"
@@ -53,6 +63,7 @@ variable "admin_ssh_key" {
 variable "aks_control_plane_version" {
   type        = string
   description = "Kubernetese version"
+  default     = "1.29.7"
 }
 
 variable "sku_tier" {
@@ -75,6 +86,11 @@ variable "create_resource_group" {
   type        = bool
   description = "decides if a new resource group should be created for the AKS resources"
   default     = true
+}
+
+variable "create_vnet_resource_group" {
+  type        = bool
+  description = "decides if a new resource group should be created for the AKS resources"
 }
 
 variable "tags" {

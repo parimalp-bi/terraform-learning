@@ -1,3 +1,7 @@
 .vscode/
 .terraform/
 .terraform.lock.hcl
+.local
+# Provisinor/vm/*.local
+Provisinor/*/*.local
+provider_override.tf

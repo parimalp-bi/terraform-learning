@@ -2,18 +2,19 @@ module "network" {
   source              = "../../modules/network"
   vnet_name           = var.vnet_name
   location            = var.location
-  subnet_name         = var.subnet_name
-  address_prefix      = var.address_prefix
-  resource_group_name = local.rg_name
+  resource_group_name = var.vnet_resource_group_name
   address_space       = var.address_space
-
+  subnets             = var.subnets
+  create_vnet_resource_group = var.create_vnet_resource_group
 }
 
 module "aks" {
   source     = "../../modules/aks"
   depends_on = [module.network]
   // for Node and Pod Network Settings
-  subnets_id = module.network.subnet_id
+  subnets_id          = {
+    default = module.network.subnet_ids[var.subnet_key] # Default node pool subnet
+  }
   // for Node and Pod Network Settings 
   // for ip_prefixes
   outbound_ipv4_prefix_length           = var.outbound_ipv4_prefix_length

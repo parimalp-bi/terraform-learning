@@ -3,10 +3,6 @@ variable "vnet_name" {
   type        = string
 }
 
-variable "subnet_name" {
-  description = "Name of the Subnet"
-  type        = string
-}
 
 variable "location" {
   description = "Location for the resources"
@@ -23,7 +19,17 @@ variable "address_space" {
   type        = list(string)
 }
 
-variable "address_prefix" {
-  description = "Address prefix for the subnet"
-  type        = list(string)
+
+variable "subnets" {
+  description = "A list of subnet configurations"
+  type = list(object({
+    name           = string
+    address_prefix = list(string)
+  }))
+}
+
+variable "create_vnet_resource_group" {
+  type        = bool
+  description = "decides if a new resource group should be created for the AKS resources"
+  default     = false
 }
