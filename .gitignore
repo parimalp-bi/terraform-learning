@@ -3,5 +3,5 @@
 .terraform.lock.hcl
 .local
 # Provisinor/vm/*.local
-Provisinor/*/*.local
+Provisioners/*/*.local
 provider_override.tf
